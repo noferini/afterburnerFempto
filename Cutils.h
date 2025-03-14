@@ -45,13 +45,27 @@ public:
   void print() const;
 };
 
+class particleCand
+{
+public:
+  std::vector<TLorentzVector> q;
+  std::vector<int> pdgOptions;
+
+  particleCand() {}
+  void addOption(double px, double py, double pz, int pdg);
+};
+
 class utils
 {
   public:
-    static double getKstar(const particleMC& p1, const particleMC& p2);           // return kstar
-    static double getKstarAsPr(const particleMC& p1, const particleMC& p2);       // return kstar
-    static double getKt(const particleMC& p1, const particleMC& p2);              // return kT
-    static double getKtAsPr(const particleMC& p1, const particleMC& p2);          // return kT
+    static double getKstar(const particleMC& p1, const particleMC& p2);                         // return kstar
+    static double getKstarAsPr(const particleMC& p1, const particleMC& p2);                     // return kstar
+    static double getKt(const particleMC& p1, const particleMC& p2);                            // return kT
+    static double getKtAsPr(const particleMC& p1, const particleMC& p2);                        // return kT
+    static double getKstar(const particleCand& p1, const particleCand& p2, int iPdg);           // return kstar
+    static double getKstarAsPr(const particleCand& p1, const particleCand& p2, int iPdg);       // return kstar
+    static double getKt(const particleCand& p1, const particleCand& p2, int iPdg);              // return kT
+    static double getKtAsPr(const particleCand& p1, const particleCand& p2, int iPdg);          // return kT
 };
 
 #endif

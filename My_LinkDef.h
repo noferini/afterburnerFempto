@@ -5,6 +5,8 @@
 
 #pragma link C++ class particle;
 #pragma link C++ class particleMC;
+#pragma link C++ class particleCand;
+#pragma link C++ class std::vector<particleCand>;
 #pragma link C++ class std::vector<particle>;
 #pragma link C++ class std::vector<particleMC>;
 #pragma link C++ class utils++;
@@ -15,5 +17,7 @@
 #pragma link C++ class vreader++;
 #pragma link C++ class readerMC++;
 #pragma link C++ class readerFE++;
+
+#pragma link C++ class vrun++;
 
 #endif
