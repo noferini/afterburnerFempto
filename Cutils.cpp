@@ -30,38 +30,38 @@ double utils::getMass(int pdg){
   return mass;
 }
 //_________________________________________________________________________
-double utils::getKstar(const particleCand& p1, const particleCand& p2, int iPdg){
-  TLorentzVector pSum = p1.q[iPdg] + p2.q[iPdg];
+double utils::getKstar(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2){
+  TLorentzVector pSum = p1.q[iPdg1] + p2.q[iPdg2];
   double Minv = pSum.M();
-  double mass1square = p1.q[iPdg].M()*p1.q[iPdg].M();
-  double mass2square = p2.q[iPdg].M()*p2.q[iPdg].M();
+  double mass1square = p1.q[iPdg1].M()*p1.q[iPdg2].M();
+  double mass2square = p2.q[iPdg1].M()*p2.q[iPdg2].M();
   double A = Minv*Minv - mass1square - mass2square;
 
   return sqrt(A*A - 4 * mass1square * mass2square) * 0.5 / Minv;
 }
 //_________________________________________________________________________
-double utils::getKt(const particleCand& p1, const particleCand& p2, int iPdg){
-  TLorentzVector pSum = 0.5*(p1.q[iPdg] + p2.q[iPdg]);
+double utils::getKt(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2){
+  TLorentzVector pSum = 0.5*(p1.q[iPdg1] + p2.q[iPdg2]);
   return pSum.Pt();
 }
 //_________________________________________________________________________
-double utils::getKstarAsPr(const particleCand& p1, const particleCand& p2, int iPdg){
-  float m1scaling = 0.938/p1.q[iPdg].M();
-  float m2scaling = 0.938/p2.q[iPdg].M();
+double utils::getKstarAsPr(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2){
+  float m1scaling = 0.938/p1.q[iPdg1].M();
+  float m2scaling = 0.938/p2.q[iPdg2].M();
 
-  TLorentzVector pSum = p1.q[iPdg]*m1scaling + p2.q[iPdg]*m2scaling;
+  TLorentzVector pSum = p1.q[iPdg1]*m1scaling + p2.q[iPdg2]*m2scaling;
   double Minv = pSum.M();
-  double mass1square = p1.q[iPdg].M()*p1.q[iPdg].M()*m1scaling*m1scaling;
-  double mass2square = p2.q[iPdg].M()*p2.q[iPdg].M()*m2scaling*m2scaling;
+  double mass1square = p1.q[iPdg1].M()*p1.q[iPdg1].M()*m1scaling*m1scaling;
+  double mass2square = p2.q[iPdg2].M()*p2.q[iPdg2].M()*m2scaling*m2scaling;
   double A = Minv*Minv - mass1square - mass2square;
 
   return sqrt(A*A - 4 * mass1square * mass2square) * 0.5 / Minv;
 }
 //_________________________________________________________________________
-double utils::getKtAsPr(const particleCand& p1, const particleCand& p2, int iPdg){
-  float m1scaling = 0.938/p1.q[iPdg].M();
-  float m2scaling = 0.938/p2.q[iPdg].M();
-  TLorentzVector pSum = 0.5*(p1.q[iPdg]*m1scaling + p2.q[iPdg]*m2scaling);
+double utils::getKtAsPr(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2){
+  float m1scaling = 0.938/p1.q[iPdg1].M();
+  float m2scaling = 0.938/p2.q[iPdg2].M();
+  TLorentzVector pSum = 0.5*(p1.q[iPdg1]*m1scaling + p2.q[iPdg2]*m2scaling);
   return pSum.Pt();
 }
 //_________________________________________________________________________
@@ -98,6 +98,24 @@ double utils::getKtAsPr(const particleMC& p1, const particleMC& p2){
   float m2scaling = 0.938/p2.q.M();
   TLorentzVector pSum = 0.5*(p1.q*m1scaling + p2.q*m2scaling);
   return pSum.Pt();
+}
+//_________________________________________________________________________
+double utils::getDPhi(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2, double rangeMin, double rangeMax, double shift){
+  double phi1 = p1.q[iPdg1].Phi();
+  double phi2 = p2.q[iPdg2].Phi();
+
+  double dPhi = phi1 - phi2;
+  if(dPhi < rangeMin) dPhi = dPhi + shift;
+  if(dPhi > rangeMax) dPhi = dPhi - shift;
+
+  return dPhi;
+}
+double utils::getDEta(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2){
+  double eta1 = p1.q[iPdg1].Eta();
+  double eta2 = p2.q[iPdg2].Eta();
+
+  double dEta = eta1 - eta2;
+  return dEta;
 }
 //_________________________________________________________________________
 void particleMC::print() const {

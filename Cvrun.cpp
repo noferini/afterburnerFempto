@@ -10,14 +10,19 @@ void vrun::setEvent(const std::vector<particleMC>& vect){
     mVect.push_back(p);
   }
 }
+void vrun::setIDName(const TString& name){
+  mName = name;
+}
 //_________________________________________________________________________
 void vrun::init(){
   initHistos();
 }
 //_________________________________________________________________________
 void vrun::initHistos(){
-    mHkstarSE = new TH2D("mHkstarSE","Same Event;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
-    mHkstarME = new TH2D("mHkstarME","Mixed Events;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
+    mHkstarSE = new TH2D("mHkstarSE" + mName,"Same Event;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
+    mHkstarME = new TH2D("mHkstarME" + mName,"Mixed Events;k_{T} (GeV/c);k* (MeV/c);N(k*)",10,0,2,100,0,1);
+    mDPhiDEtaSE = new TH2D("mDPhiDEtaSE" + mName,"Same Event;#Delta#eta;#Delta#Phi;N(#Delta#Phi)",40,-2,2,20,-TMath::Pi()*0.5,TMath::Pi()*3*0.5);
+    mDPhiDEtaME = new TH2D("mDPhiDEtaME" + mName,"Mixed Event;#Delta#eta;#Delta#Phi;N(#Delta#Phi)",40,-2,2,20,-TMath::Pi()*0.5,TMath::Pi()*3*0.5);
 }
 //_________________________________________________________________________
 void vrun::finalize(){
@@ -28,10 +33,12 @@ void vrun::finalizeHistos(){
 }
 //_________________________________________________________________________
 void vrun::write(){
-  gFile->mkdir("vrun");
-  gFile->cd("vrun");
+  gFile->mkdir("vrun" + mName);
+  gFile->cd("vrun" + mName);
   mHkstarSE->Write();
   mHkstarME->Write();
+  mDPhiDEtaSE->Write();
+  mDPhiDEtaME->Write();
   gFile->cd();
 }
 //_________________________________________________________________________
@@ -62,8 +69,23 @@ void vrun::process(){
       if(ipdg2 < 0){
         continue;
       }
-      double kt = utils::getKt(p1,p2,ipdg1);
-      double kstar = utils::getKstar(p1,p2,ipdg2);
+      double kt = utils::getKt(p1,p2,ipdg1,ipdg2);
+      double kstar = utils::getKstar(p1,p2,ipdg1,ipdg2);
+
+      bool conditionEta1 = (p1.q[ipdg1].Eta() > -1. && p1.q[ipdg1].Eta() < 1.);
+      bool conditionEta2 = (p2.q[ipdg2].Eta() > -1. && p2.q[ipdg2].Eta() < 1.);
+      bool conditionPt1 = (p1.q[ipdg1].Pt() > 0.4 && p1.q[ipdg1].Pt() < 1.);
+      bool conditionPt2 = (p2.q[ipdg2].Pt() > 0.4 && p2.q[ipdg2].Pt() < 1.);
+
+      if(conditionEta1 && conditionEta2 && conditionPt1 && conditionPt2){
+        double rangeMin = -TMath::Pi()*0.5;
+        double rangeMax = TMath::Pi()*3*0.5;
+        double shift = TMath::Pi()*2;
+        double dPhi = utils::getDPhi(p1,p2,ipdg1,ipdg2,rangeMin,rangeMax,shift);
+        double dEta = utils::getDEta(p1,p2,ipdg1,ipdg2);
+
+        mDPhiDEtaSE->Fill(dEta, dPhi);
+      }
 
       mHkstarSE->Fill(kt, kstar);
     }
@@ -90,8 +112,23 @@ void vrun::process(){
              continue;
            }
 
-           double kt = utils::getKt(p1,p2,ipdg1);
-           double kstar = utils::getKstar(p1,p2,ipdg2);
+           double kt = utils::getKt(p1,p2,ipdg1,ipdg2);
+           double kstar = utils::getKstar(p1,p2,ipdg1,ipdg2);
+
+           bool conditionEta1 = (p1.q[ipdg1].Eta() > -1. && p1.q[ipdg1].Eta() < 1.);
+           bool conditionEta2 = (p2.q[ipdg2].Eta() > -1. && p2.q[ipdg2].Eta() < 1.);
+           bool conditionPt1 = (p1.q[ipdg1].Pt() > 0.4 && p1.q[ipdg1].Pt() < 1.);
+           bool conditionPt2 = (p2.q[ipdg2].Pt() > 0.4 && p2.q[ipdg2].Pt() < 1.);
+
+           if(conditionEta1 && conditionEta2 && conditionPt1 && conditionPt2){
+            double rangeMin = -TMath::Pi()*0.5;
+            double rangeMax = TMath::Pi()*3*0.5;
+            double shift = TMath::Pi()*2;
+            double dPhi = utils::getDPhi(p1,p2,ipdg1,ipdg2,rangeMin,rangeMax,shift);
+            double dEta = utils::getDEta(p1,p2,ipdg1,ipdg2);
+
+            mDPhiDEtaME->Fill(dEta, dPhi);
+           }
 
            mHkstarME->Fill(kt, kstar);
         }
@@ -122,3 +159,20 @@ int vrun::selectP2(const particleCand& p){
   }
   return -1;
 }
+//_________________________________________________________________________
+TH2D* vrun::getKstarSE(){
+  return mHkstarSE;
+}
+//_________________________________________________________________________
+TH2D* vrun::getKstarME(){
+  return mHkstarME;
+}
+//_________________________________________________________________________
+TH2D* vrun::getDPhiDEtaSE(){
+  return mDPhiDEtaSE;
+}
+//_________________________________________________________________________
+TH2D* vrun::getDPhiDEtaME(){
+  return mDPhiDEtaME;
+}
+

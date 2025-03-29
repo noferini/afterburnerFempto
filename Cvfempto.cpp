@@ -38,7 +38,7 @@ void vfempto::doInteractAll(std::vector<particleMC>& part, bool doScattering, bo
       }
 
       double kstar = utils::getKstar(part[i1],part[i2]);
-      if(kstar > 0.4){
+      if(kstar > mThreshold){
         continue;
       }
 
