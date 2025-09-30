@@ -29,10 +29,12 @@ class vrun
     virtual TH2D* getDPhiDEtaME();
 
     void doAnalysis();
+    void doAnalysis(double weight);
 
   protected:
     std::vector<particleCand> mVect;
     virtual void process();
+    virtual void process(double weight);
     virtual void initHistos();
     virtual void initEventsHisto();
     virtual void finalizeHistos();
