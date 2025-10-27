@@ -6,13 +6,16 @@ input_folder="$1"
 n_jobs="$2"
 macro_name="$3"
 output_folder="$4"
-final_output_name="$5"
 
 # Check arguments
-if [[ -z "$input_folder" || -z "$n_jobs" || -z "$macro_name" || -z "$output_folder" || -z "$final_output_name" ]]; then
-  echo "Usage: $0 <input_folder> <number_of_jobs> <macro_name> <output_folder> <final_output_file.root>"
+if [[ -z "$input_folder" || -z "$n_jobs" || -z "$macro_name" || -z "$output_folder" ]]; then
+  echo "Usage: $0 <input_folder> <number_of_jobs> <macro_name> <output_folder> "
   exit 1
 fi
+
+# Normalize input and output folder paths (remove trailing slashes)
+input_folder="${input_folder%/}"
+output_folder="${output_folder%/}"
 
 # Determine available CPU cores (macOS or Linux)
 if command -v nproc &> /dev/null; then

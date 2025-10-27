@@ -29,7 +29,8 @@ void vrun::initHistos(){
   mDPhiDEtaME = new TH2D("mDPhiDEtaME" + mName,"Mixed Event;#Delta#eta;#Delta#Phi;N(#Delta#Phi)",40,-2,2,20,-TMath::Pi()*0.5,TMath::Pi()*3*0.5);
 }
 void vrun::initEventsHisto(){
-  mEvents = new TH1D("mEvents" + mName, "Number of events", 2, 0, 2);
+  mEvents = new TH1D("mEvents" + mName, "Number of events", 3, 0, 3);
+  mEvents->Fill("Number of unweighted Events", 0);
   mEvents->Fill("Number of Events", 0);
   mEvents->Fill("Number of accepted Events", 0);
 }
@@ -158,6 +159,8 @@ void vrun::process(){
   nevDone++;
 }
 //_________________________________________________________________________
+void vrun::process(double weight){}
+//_________________________________________________________________________
 int vrun::selectP1(const particleCand& p){
   for(int i=0; i < p.pdgOptions.size(); i++){
     if(p.pdgOptions[i] == mPDG1 && std::abs(p.q[i].Eta()) < 1){
@@ -193,10 +196,21 @@ TH2D* vrun::getDPhiDEtaME(){
 }
 //_________________________________________________________________________
 void vrun::doAnalysis(){
+  mEvents->Fill("Number of unweighted Events", 1);
   mEvents->Fill("Number of Events", 1);
   auto selectionCondition = applyCuts();
   if(selectionCondition == true) {
     mEvents->Fill("Number of accepted Events", 1);
     process();
+  }
+}
+//_________________________________________________________________________
+void vrun::doAnalysis(double weight){
+  mEvents->Fill("Number of unweighted Events", 1);
+  mEvents->Fill("Number of Events", weight);
+  auto selectionCondition = applyCuts();
+  if(selectionCondition == true) {
+    mEvents->Fill("Number of accepted Events", weight);
+    process(weight);
   }
 }
