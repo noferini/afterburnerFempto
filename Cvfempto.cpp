@@ -207,113 +207,20 @@ void vfempto::doInteractAllStep(int step, std::vector<particleMC>& part, bool do
       if(1){//A == 2 && npro == 1){ // detueron
         particleMC& p1 = part[mergeable[0]];
         particleMC& p2 = part[mergeable[1]];
-        particleMC merged = merge(p1,p2);
 
+        particleMC photon;
+        part.push_back(photon);
+        p1.daughters.push_back(newpart);
+        p2.daughters.push_back(newpart);
+
+        particleMC merged = merge(p1,p2,part[newpart]);
+
+        newpart++;
         p1.daughters.push_back(newpart);
         p2.daughters.push_back(newpart);
         part.push_back(merged);
 
         mHsizeMerge->Fill(mergeable.size());
-      } else if(A == 3 && npro > 0 && nneu > 0) { // tritium or 3He
-        particleMC& p1 = part[mergeable[0]];
-        particleMC& p2 = part[mergeable[1]];
-        particleMC& p3 = part[mergeable[2]];
-        particleMC temp = merge(p1,p2);
-        particleMC merged = merge(temp,p3);
-
-        p1.daughters.push_back(newpart);
-        p2.daughters.push_back(newpart);
-        p3.daughters.push_back(newpart);
-        part.push_back(merged);
-
-        mHsizeMerge->Fill(mergeable.size());
-      } else if(A == 4 && npro > 0 && nneu > 0) { // 4He or lower-mass nuclei
-        if(npro == 2){  // 4He
-          particleMC& p1 = part[mergeable[0]];
-          particleMC& p2 = part[mergeable[1]];
-          particleMC& p3 = part[mergeable[2]];
-          particleMC& p4 = part[mergeable[3]];
-
-          particleMC temp = merge(p1,p2);
-          particleMC temp2 = merge(temp,p3);
-          particleMC merged = merge(temp2,p4);
-
-          p1.daughters.push_back(newpart);
-          p2.daughters.push_back(newpart);
-          p3.daughters.push_back(newpart);
-          p4.daughters.push_back(newpart);
-          part.push_back(merged);
-
-          mHsizeMerge->Fill(mergeable.size());
-        } else if(npro == 1){  // tritium
-          int ip;
-          int in[2];
-          std::vector<std::pair<int,float>> ind;
-          for(int iel=0; iel < 4; iel++){
-            ind.push_back(std::make_pair(mergeable[iel],gRandom->Rndm()));
-          }
-          std::sort(ind.begin(), ind.end(),  [](auto &left, auto &right) {return left.second < right.second;});
-
-          int n_neu=0;
-          for(int iel=0; iel < 4; iel++){
-            particleMC& p = part[ind[iel].first];
-            if(std::abs(p.pdg) == 2212){
-              ip = ind[iel].first;
-              continue;
-            }
-            if(std::abs(p.pdg) == 2112 && n_neu < 2){
-              in[n_neu] = ind[iel].first;
-              n_neu++;
-            }
-          }
-
-          particleMC& p1 = part[ip];
-          particleMC& p2 = part[in[0]];
-          particleMC& p3 = part[in[1]];
-          particleMC temp = merge(p1,p2);
-          particleMC merged = merge(temp,p3);
-
-          p1.daughters.push_back(newpart);
-          p2.daughters.push_back(newpart);
-          p3.daughters.push_back(newpart);
-          part.push_back(merged);
-
-          mHsizeMerge->Fill(3);
-        }  else if(nneu == 1){  // 3He
-          int in;
-          int ip[2];
-          std::vector<std::pair<int,float>> ind;
-          for(int iel=0; iel < 4; iel++){
-            ind.push_back(std::make_pair(mergeable[iel],gRandom->Rndm()));
-          }
-          std::sort(ind.begin(), ind.end(),  [](auto &left, auto &right) {return left.second < right.second;});
-
-          int n_pro=0;
-          for(int iel=0; iel < 4; iel++){
-            particleMC& p = part[ind[iel].first];
-            if(std::abs(p.pdg) == 2112){
-              in = ind[iel].first;
-              continue;
-            }
-            if(std::abs(p.pdg) == 2212 && n_pro < 2){
-              ip[n_pro] = ind[iel].first;
-              n_pro++;
-            }
-          }
-
-          particleMC& p1 = part[in];
-          particleMC& p2 = part[ip[0]];
-          particleMC& p3 = part[ip[1]];
-          particleMC temp = merge(p1,p2);
-          particleMC merged = merge(temp,p3);
-
-          p1.daughters.push_back(newpart);
-          p2.daughters.push_back(newpart);
-          p3.daughters.push_back(newpart);
-          part.push_back(merged);
-
-          mHsizeMerge->Fill(3);
-        }
       }
     }
   }
@@ -460,7 +367,7 @@ double vfempto::doInteract(particleMC& p1, particleMC& p2, float chargeColoumb, 
   return ptEx;
 }
 //_________________________________________________________________________
-particleMC vfempto::merge(const particleMC& p1, const particleMC& p2){
+particleMC vfempto::merge(const particleMC& p1, const particleMC& p2, particleMC& photon){
   particleMC pSum;
   pSum.q = p1.q + p2.q;
   int pdgSum = p1.pdg + p2.pdg;
@@ -473,6 +380,19 @@ particleMC vfempto::merge(const particleMC& p1, const particleMC& p2){
   pSum.mother = -1;              // not tracing mothers
   pSum.StrongC = p1.StrongC + p2.StrongC;
   pSum.ColoumbC = p1.ColoumbC + p2.ColoumbC;
+
+  // photon
+  TVector3 b = pSum.q.BoostVector();
+  TVector3 bInv = -b;
+  // start from rest frame
+  double energyPhotonRestFrame = pSum.q.M() - mass + 2.2E-3; // intial energy - mass consitutents + binding energy
+  double theta = acos(1 - 2*gRandom->Rndm());
+  double phi = gRandom->Rndm()*2*TMath::Pi();
+  photon.q.SetPxPyPzE(energyPhotonRestFrame*sin(theta)*cos(phi),energyPhotonRestFrame*sin(theta)*sin(phi),energyPhotonRestFrame*cos(theta),energyPhotonRestFrame);
+
+  // go back to lab frame
+  photon.q.Boost(b);
+  photon.pdg = 22;
 
   return pSum;
 }

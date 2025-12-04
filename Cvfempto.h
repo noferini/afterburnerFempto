@@ -34,7 +34,7 @@ class vfempto
     bool mIsInitialized = false;
     double mThreshold = 0.4;
     int mNmaxSteps = 3;
-    particleMC merge(const particleMC& p1, const particleMC& p2);
+    particleMC merge(const particleMC& p1, const particleMC& p2, particleMC& photon);
 
   private:
     TH1F *mHsizeGroup = nullptr;
