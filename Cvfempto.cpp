@@ -371,26 +371,26 @@ particleMC vfempto::merge(const particleMC& p1, const particleMC& p2, particleMC
   particleMC pSum;
   pSum.q = p1.q + p2.q;
   int pdgSum = p1.pdg + p2.pdg;
-  double mass = p1.q.M() + p2.q.M();
+  double mass = utils::getMass(pdgSum);
+  double DeltaE = pSum.q.M() - mass;                      // intial energy - mass consitutents + binding energy
+  double energyPhotonRestFrame = DeltaE * (1 + DeltaE*0.5/mass) / (1 + DeltaE/mass);
   double p = pSum.q.P();
-  double e = sqrt(p*p + mass*mass);
-  pSum.q.SetE(e);
+  // photon in rest frame
+  double theta = acos(1 - 2*gRandom->Rndm());
+  double phi = gRandom->Rndm()*2*TMath::Pi();
+  photon.q.SetPxPyPzE(energyPhotonRestFrame*sin(theta)*cos(phi),energyPhotonRestFrame*sin(theta)*sin(phi),energyPhotonRestFrame*cos(theta),energyPhotonRestFrame);
+  TVector3 b = pSum.q.BoostVector();
+
+  // final detuerons
+  pSum.q.SetPxPyPzE(-photon.q.Px(),-photon.q.Py(),-photon.q.Pz(),sqrt(photon.q.P()*photon.q.P() + mass*mass));
+  pSum.q.Boost(b); //to lab
 
   pSum.pdg = p1.pdg + p2.pdg;
   pSum.mother = -1;              // not tracing mothers
   pSum.StrongC = p1.StrongC + p2.StrongC;
   pSum.ColoumbC = p1.ColoumbC + p2.ColoumbC;
 
-  // photon
-  TVector3 b = pSum.q.BoostVector();
-  TVector3 bInv = -b;
-  // start from rest frame
-  double energyPhotonRestFrame = pSum.q.M() - mass + 2.2E-3; // intial energy - mass consitutents + binding energy
-  double theta = acos(1 - 2*gRandom->Rndm());
-  double phi = gRandom->Rndm()*2*TMath::Pi();
-  photon.q.SetPxPyPzE(energyPhotonRestFrame*sin(theta)*cos(phi),energyPhotonRestFrame*sin(theta)*sin(phi),energyPhotonRestFrame*cos(theta),energyPhotonRestFrame);
-
-  // go back to lab frame
+  // final photon to lab
   photon.q.Boost(b);
   photon.pdg = 22;
 
