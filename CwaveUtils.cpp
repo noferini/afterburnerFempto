@@ -208,7 +208,7 @@ void waveUtils::setKstar(float kstar, float kt, utils::type system) {
     mSourceKin->SetParameter(2, kstar);
     mCoalescenceRe->SetParameter(2, kstar);
     mCoalescenceIm->SetParameter(2, kstar);
-    setSourceRadius(mSourceRadius/kt); // to trigger new normalization
+    setSourceRadius(mSourceRadius); // to trigger new normalization
   }
 
 }
