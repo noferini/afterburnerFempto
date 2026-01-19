@@ -7,11 +7,13 @@ int pdgAntiDe = -4324; // antideuteron
 
 bool isWigner = false;
 
-void runAll(TString listname,  TString outfolder, TString outname)
+#define MAXD(...) std::max(std::initializer_list<double>{__VA_ARGS__})
+
+void runAll(TString listname, TString outfolder, TString outname, double R_D = 3.2, double R_0 = 1.125)
 {
   // set file reader
   vreader *reader = new readerFE();
-  reader->setEtaRange(-100.,100);
+  //reader->setEtaRange(-100.,100);
   reader->openFile(listname, true); // true to read a collection
   int nev = reader->getNevents();
   printf("N events found = %d\n", nev);
@@ -64,35 +66,53 @@ void runAll(TString listname,  TString outfolder, TString outname)
   runDeAntiPr->init();                  // init analysis
 
   runSpectrum *spectra = new runSpectrum(); //spectrum analysis
-  spectra->setRapidityRange(-100.,100);
+  //spectra->setRapidityRange(-100.,100);
   spectra->init();
 
+  //waveUtils::setParams(10, R);
+
+  //waveUtils::setParams(waveUtils::calculateV0(), R);
 
   //-------- interactor ------------------------
+  double vStrong = 0;
   vfempto *interactor;
-
+  auto R_0_eff = R_0*2*(-1); 
   if(! isWigner){
    interactor = new femptoSource;      // Lenard-Jones  strong potential
-   interactor->setParams(17.4, 3.2, 1.44, -3, 3./8);
+   interactor->setParams(17.4, R_D, 1.44, R_0_eff, 3./8);
+   vStrong = waveUtils::calculateV0();
+   interactor->setParams(vStrong, R_D, 1.44, R_0_eff, 3./8);
   } else {
    interactor = new femptoSource<wignerUtils>;      // Lenard-Jones trong potential
    interactor->setParams(17.4E-3, 3.2, 1.44E-3, 1.5, 3./8);
   }
   interactor->setThreshold(0.4);
 
+  //-------- interactor ------------------------
+  TFile *weightFilePr = new TFile("weight/weightPr.root", "READ");
+  auto hWeightTotalPr = (TH1D *)weightFilePr->Get("ratioPr");
 
+  std::cout<<"Strong Radius: "<< R_D << "\t Strong Potential: "<< vStrong <<"\n";
 
   for (int i = 0; i < nev; i++)
   {
     // read event
     reader->NextEvent();
     std::vector<particleMC> &event = reader->getParticles();
+    auto PrPt = returnPt(event, -0.5, 0.5, pdgPr);
+    auto NePt = returnPt(event, -0.5, 0.5, pdgNe);
+    auto AntiPrPt = returnPt(event, -0.5, 0.5, pdgAntiPr);
+    auto AntiNePt = returnPt(event, -0.5, 0.5, pdgAntiNe);
+    auto ptValue = MAXD(PrPt, NePt, AntiPrPt, AntiNePt);
+    double weight;
+    if (ptValue < 0) weight = 1;
+    else weight = computeWeight(ptValue, hWeightTotalPr);
 
     if (i % 100000 == 0)
       std::cout << "Event: " << i << "/" << nev << " - " << ((double)i / (double)nev) * 100 << "\n";
 
     // for MC add it the effect of afterburner
-    interactor->doInteractAll(event, true, true);
+    interactor->doInteractAll(event, false, true);
     //---------------------------------------
 
     // then analyze
@@ -124,7 +144,7 @@ void runAll(TString listname,  TString outfolder, TString outname)
     runDeAntiPr->doAnalysis();       // process the event
 
     spectra->setEvent(event);
-    spectra->doAnalysis();
+    spectra->doAnalysis(weight);
   }
 
   // finalization
@@ -187,4 +207,5 @@ void runAll(TString listname,  TString outfolder, TString outname)
   TFile *foutSpec = new TFile(outfolder + "Spectrum" + outname , "RECREATE");
   spectra->write();
   foutSpec->Close();
+
 }
