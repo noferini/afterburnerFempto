@@ -144,6 +144,7 @@ void waveUtils::setCharges(float cS, float cC){
 }
 //_________________________________________________________________________
 void waveUtils::setKstar(float kstar, float kt, utils::type system) {
+  const double protonMass = utils::getMass(2212);
   if(! mIsInitialized){
     init();
   }
@@ -192,7 +193,7 @@ void waveUtils::setKstar(float kstar, float kt, utils::type system) {
 
     if(mIsRadiusMtDependent){ //
       const float mtRef = 1; // radius is given at mT=1 GeV/c^2 for protons
-      float mt = sqrt(kt*kt + 0.938*0.938);
+      float mt = sqrt(kt*kt + protonMass*protonMass);
       radiusSource *= TMath::Power(mtRef/mt,0.6);
     }
     static const float factor = sqrt(3*0.5) * HCUT;
@@ -397,7 +398,7 @@ double waveUtils::sourceV(double *x,double *pm){
 //_________________________________________________________________________
 void waveUtils::init(){
   printf("before %f\n",mStrong);
-  mStrong = calculateV0(EBOUND_D, 938/2, 1, 0, "deuteron(p+n)");
+  mStrong = calculateV0(EBOUND_D, utils::getMass(2212)*1000/2, 1, 0, "deuteron(p+n)");
   printf("after %f\n",mStrong);
 
   mIsInitialized = true;

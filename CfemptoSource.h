@@ -1,6 +1,7 @@
 #ifndef CFEMPTOSOURCE
 #define CFEMPTOSOURCE
 
+#include "Cutils.h"
 #include "Cvfempto.h"
 #include "CwignerUtils.h"
 #include "CwaveUtils.h"

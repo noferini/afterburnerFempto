@@ -187,12 +187,12 @@ class runSpectrum : public vrun
       int mPDGAntiHe3 = -2*2212 - 2112;
       int mPDGAntiHe4 = -2*2212 - 2*2112;
 
-      float protonMass = 0.938272088;
-      float neutronMass = 0.939565420;
-      float deuteronMass = 1.875612942;
-      float helium3Mass = 2.808391607;
-      float tritiumMass = 2.808921132;
-      float helium4Mass = 3.727379378;
+      const float protonMass = utils::getMass(2212);
+      const float neutronMass = utils::getMass(2112);
+      const float deuteronMass = utils::getMass(2212+2112);
+      const float helium3Mass = utils::getMass(2212+2212+2112);
+      const float tritiumMass = utils::getMass(2212+2112+2112);
+      const float helium4Mass = utils::getMass(2212+2212+2112+2112);
 
       float mMinRapidity = -0.5;
       float mMaxRapidity = 0.5;

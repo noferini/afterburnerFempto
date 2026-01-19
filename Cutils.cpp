@@ -46,8 +46,9 @@ double utils::getKt(const particleCand& p1, const particleCand& p2, int iPdg1, i
 }
 //_________________________________________________________________________
 double utils::getKstarAsPr(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2){
-  float m1scaling = 0.938/p1.q[iPdg1].M();
-  float m2scaling = 0.938/p2.q[iPdg2].M();
+  const double protonMass = utils::getMass(2212);
+  float m1scaling = protonMass/p1.q[iPdg1].M();
+  float m2scaling = protonMass/p2.q[iPdg2].M();
 
   TLorentzVector pSum = p1.q[iPdg1]*m1scaling + p2.q[iPdg2]*m2scaling;
   double Minv = pSum.M();
@@ -59,8 +60,9 @@ double utils::getKstarAsPr(const particleCand& p1, const particleCand& p2, int i
 }
 //_________________________________________________________________________
 double utils::getKtAsPr(const particleCand& p1, const particleCand& p2, int iPdg1, int iPdg2){
-  float m1scaling = 0.938/p1.q[iPdg1].M();
-  float m2scaling = 0.938/p2.q[iPdg2].M();
+  const double protonMass = utils::getMass(2212);
+  float m1scaling = protonMass/p1.q[iPdg1].M();
+  float m2scaling = protonMass/p2.q[iPdg2].M();
   TLorentzVector pSum = 0.5*(p1.q[iPdg1]*m1scaling + p2.q[iPdg2]*m2scaling);
   return pSum.Pt();
 }
@@ -81,8 +83,9 @@ double utils::getKt(const particleMC& p1, const particleMC& p2){
 }
 //_________________________________________________________________________
 double utils::getKstarAsPr(const particleMC& p1, const particleMC& p2){
-  float m1scaling = 0.938/p1.q.M();
-  float m2scaling = 0.938/p2.q.M();
+  const double protonMass = utils::getMass(2212);
+  float m1scaling = protonMass/p1.q.M();
+  float m2scaling = protonMass/p2.q.M();
 
   TLorentzVector pSum = p1.q*m1scaling + p2.q*m2scaling;
   double Minv = pSum.M();
@@ -94,8 +97,9 @@ double utils::getKstarAsPr(const particleMC& p1, const particleMC& p2){
 }
 //_________________________________________________________________________
 double utils::getKtAsPr(const particleMC& p1, const particleMC& p2){
-  float m1scaling = 0.938/p1.q.M();
-  float m2scaling = 0.938/p2.q.M();
+  const double protonMass = utils::getMass(2212);
+  float m1scaling = protonMass/p1.q.M();
+  float m2scaling = protonMass/p2.q.M();
   TLorentzVector pSum = 0.5*(p1.q*m1scaling + p2.q*m2scaling);
   return pSum.Pt();
 }

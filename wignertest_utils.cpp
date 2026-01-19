@@ -24,7 +24,7 @@ void wignertest_utils()
 
     float xk[1000], xP[1000], xK[1000], xE[1000], xV[1000], xkf[1000];
     int np = 0;
-    double mRed = 0.938 / 2;
+    double mRed = utils::getMass(2212) / 2;
 
     for (double i = 1E-3 / 2; i < 0.5; i += 2E-3)
     {

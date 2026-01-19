@@ -51,11 +51,13 @@ class waveUtils
     static constexpr double EBOUND_T = -8.48;   // [MeV] deuteron binding energy
     static constexpr double EBOUND_3HE = -7.72; // [MeV] deuteron binding energy
     static constexpr double EBOUND_HE = -28.3;  // [MeV] deuteron binding energy
+
     static constexpr float MRED_NN = 938/2.;    // [MeV] reducted mass for Nucleon-Nucleon
     static constexpr float MRED_DN = 2*938/3.;  // [MeV] reducted mass for Nucleon-Nucleon
     static constexpr float MRED_DD = 938;       // [MeV] reducted mass for Nucleon-Nucleon
     static constexpr float MRED_TN = 3*938/4.;  // [MeV] reducted mass for Nucleon-Nucleon
     static constexpr float MRED_HEN = 3*938/4.; // [MeV] reducted mass for Nucleon-Nucleon
+
     static float mStrong;                       // attractive potential
     static float mStrongR;                      // radius of box potential
     static float mCoulomb;
